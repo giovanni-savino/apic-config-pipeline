@@ -442,7 +442,7 @@ try:
 
     response = api_calls.make_api_call(url, admin_bearer_token, 'get')
     print("CALL: "+ str(response.json()['results'][0]['name']))
-    if response.status_code == 200 and str(response.json()['results'][0]['name']) == data['title']:
+    if response.status_code == 200:
           print('Organization already exists')
     else:
       response = api_calls.make_api_call(url, admin_bearer_token, 'post', data)
@@ -534,10 +534,13 @@ try:
         print(info(12), data)
         print(info(12) + "This is the JSON dump:")
         print(info(12), json.dumps(data))
-
-    response = api_calls.make_api_call(url, admin_bearer_token, 'post', data)
-
-    if response.status_code != 201:
+    response = api_calls.make_api_call(url, admin_bearer_token, 'get')
+    if response.status_code == 200:
+        print('The Gateway is already associated')
+    else:
+      response = api_calls.make_api_call(url, admin_bearer_token, 'post', data)
+    
+      if response.status_code != 201:
           raise Exception("Return code for associating the Default Gateway Service to the Sandbox catalog isn't 201. It is " + str(response.status_code))
 
 #######
