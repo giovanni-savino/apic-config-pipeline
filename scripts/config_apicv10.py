@@ -83,12 +83,13 @@ try:
 ####################################
 # Step 4 - Create the Email Server #
 ####################################
-
+    
     print(info(4) + "####################################")
     print(info(4) + "# Step 4 - Create the Email Server #")
     print(info(4) + "####################################")
     
     url = 'https://' + environment_config["APIC_ADMIN_URL"] + '/api/orgs/' + admin_org_id + '/mail-servers'
+    
     
     # Create the data object
     data = {}
@@ -102,18 +103,25 @@ try:
     data['credentials'] = credentials
     data['tls_client_profile_url'] = None
     data['secure'] = False
-
+    
     if DEBUG:
         print(info(4) + "This is the data object:")
         print(info(4), data)
         print(info(4) + "This is the JSON dump:")
         print(info(4), json.dumps(data))
-
-    #response = api_calls.make_api_call(url, admin_bearer_token, 'post', data)
-
-    if response.status_code != 200:
-          raise Exception("Return code for creating the Email Server isn't 201. It is " + str(response.status_code))
-    #email_server_url = response.json()['url']
+    
+    # Check if mail server exists
+    response = api_calls.make_api_call(url, admin_bearer_token, 'get', data)
+    
+    if response.status_code == 200:
+        email_server_url = response.json()['url']
+    else 
+    # Create the mail server if it does not exist
+    
+        response = api_calls.make_api_call(url, admin_bearer_token, 'post', data)
+        if response.status_code != 201:
+             raise Exception("Return code for creating the Email Server isn't 201. It is " + str(response.status_code))
+        email_server_url = response.json()['url']
     if DEBUG:
         print(info(4) + "Email Server url: " + email_server_url)
 
