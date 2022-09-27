@@ -109,9 +109,9 @@ try:
         print(info(4) + "This is the JSON dump:")
         print(info(4), json.dumps(data))
 
-    response = api_calls.make_api_call(url, admin_bearer_token, 'post', data)
+    #response = api_calls.make_api_call(url, admin_bearer_token, 'post', data)
 
-    if response.status_code != 409:
+    if response.status_code != 201:
           raise Exception("Return code for creating the Email Server isn't 201. It is " + str(response.status_code))
     email_server_url = response.json()['url']
     if DEBUG:
