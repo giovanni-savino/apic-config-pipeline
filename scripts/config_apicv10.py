@@ -111,7 +111,7 @@ try:
         print(info(4), json.dumps(data))
     
     # Check if mail server exists
-    response = api_calls.make_api_call(url, admin_bearer_token, 'get', data)
+    response = api_calls.make_api_call(url, admin_bearer_token, 'get')
     
     if response.status_code == 200:
         email_server_url = response.json()['url']
