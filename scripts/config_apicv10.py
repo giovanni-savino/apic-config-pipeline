@@ -114,7 +114,7 @@ try:
     response = api_calls.make_api_call(url, admin_bearer_token, 'get')
     
     if response.status_code == 200:
-        email_server_url = response.json()['results.url']
+        email_server_url= response.json()['results'][0]['url']
     else: 
     # Create the mail server if it does not exist
     
