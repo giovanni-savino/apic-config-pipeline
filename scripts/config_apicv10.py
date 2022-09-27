@@ -113,7 +113,7 @@ try:
 
     if response.status_code != 200:
           raise Exception("Return code for creating the Email Server isn't 201. It is " + str(response.status_code))
-    email_server_url = response.json()['url']
+    #email_server_url = response.json()['url']
     if DEBUG:
         print(info(4) + "Email Server url: " + email_server_url)
 
