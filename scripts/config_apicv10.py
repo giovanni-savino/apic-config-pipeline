@@ -1,4 +1,6 @@
 import os, json
+from unittest import result
+from xmlrpc.client import ResponseError
 import utils
 import api_calls
 
@@ -90,7 +92,6 @@ try:
     
     url = 'https://' + environment_config["APIC_ADMIN_URL"] + '/api/orgs/' + admin_org_id + '/mail-servers'
     
-    
     # Create the data object
     data = {}
     data['title'] = 'Default Email Server'
@@ -112,7 +113,7 @@ try:
     
     # Check if mail server exists
     response = api_calls.make_api_call(url, admin_bearer_token, 'get')
-    
+
     if response.status_code == 200:
         email_server_url= response.json()['results'][0]['url']
     else: 
@@ -246,14 +247,19 @@ try:
         print(info(6), data)
         print(info(6) + "This is the JSON dump:")
         print(info(6), json.dumps(data))
-
-    response = api_calls.make_api_call(url, admin_bearer_token, 'post', data)
-
-    if response.status_code != 201:
+    
+    # Check if the GW is already configured
+    response = api_calls.make_api_call(url, admin_bearer_token, 'get' )
+    if response.status_code == 200:
+        print("Gateway service is already registered")
+        gateway_service_id= response.json()['results'][0]['id']
+    else:
+      response = api_calls.make_api_call(url, admin_bearer_token, 'post', data)
+      if response.status_code != 201:
           raise Exception("Return code for registering the Default Gateway Service isn't 201. It is " + str(response.status_code))
 
-    # This will be needed in the last step when we associate this Gateway Service to the Sandbox catalog
-    gateway_service_id = response.json()['id']
+      # This will be needed in the last step when we associate this Gateway Service to the Sandbox catalog
+      gateway_service_id = response.json()['id']
     if DEBUG:
         print(info(6) + "Default Gateway Service ID: " + gateway_service_id)
 
@@ -279,13 +285,19 @@ try:
         print(info(7), data)
         print(info(7) + "This is the JSON dump:")
         print(info(7), json.dumps(data))
+    
+    response = api_calls.make_api_call(url, admin_bearer_token, 'get' )
+    if response.status_code == 200:
+        print("Analytic service is already registered")
+        analytics_service_url= response.json()['results'][0]['url']
+    else:
 
-    response = api_calls.make_api_call(url, admin_bearer_token, 'post', data)
+      response = api_calls.make_api_call(url, admin_bearer_token, 'post', data)
 
-    if response.status_code != 201:
+      if response.status_code != 201:
           raise Exception("Return code for registering the Default Analytics Service isn't 201. It is " + str(response.status_code))
 
-    analytics_service_url = response.json()['url']
+      analytics_service_url = response.json()['url']
     if DEBUG:
         print(info(6) + "Default Analytics Service url: " + analytics_service_url)
 
@@ -343,9 +355,14 @@ try:
         print(info(9) + "This is the JSON dump:")
         print(info(9), json.dumps(data))
 
-    response = api_calls.make_api_call(url, admin_bearer_token, 'post', data)
+    response = api_calls.make_api_call(url, admin_bearer_token, 'get' )
+    if response.status_code == 200:
+       print("Portal service is already registered")
 
-    if response.status_code != 201:
+    else:
+      response = api_calls.make_api_call(url, admin_bearer_token, 'post', data)
+    
+      if response.status_code != 201:
           raise Exception("Return code for registering the Default Portal Service isn't 201. It is " + str(response.status_code))
 
 ############################################
@@ -388,13 +405,17 @@ try:
         print(info(10), data)
         print(info(10) + "This is the JSON dump:")
         print(info(10), json.dumps(data))
-
-    response = api_calls.make_api_call(url, admin_bearer_token, 'post', data)
-
-    if response.status_code != 201:
+    # Check if the user already esists
+    response = api_calls.make_api_call(url, admin_bearer_token, 'get')
+    if response.status_code == 200:
+          print('User already exists')
+          owner_url= response.json()['results'][0]['url']
+    else:
+        response = api_calls.make_api_call(url, admin_bearer_token, 'post', data)
+        if response.status_code != 201:
           raise Exception("Return code for registering the provider organization owner user isn't 201. It is " + str(response.status_code))
     
-    owner_url = response.json()['url']
+        owner_url = response.json()['url']
     if DEBUG:
         print(info(10) + "Provider Organization Owner url: " + owner_url)
     
@@ -419,9 +440,14 @@ try:
         print(info(10) + "This is the JSON dump:")
         print(info(10), json.dumps(data))
 
-    response = api_calls.make_api_call(url, admin_bearer_token, 'post', data)
-
-    if response.status_code != 201:
+    response = api_calls.make_api_call(url, admin_bearer_token, 'get')
+    print("CALL: "+ str(response.json()['results'][0]['name']))
+    if response.status_code == 200 and str(response.json()['results'][0]['name']) == data['title']:
+          print('Organization already exists')
+    else:
+      response = api_calls.make_api_call(url, admin_bearer_token, 'post', data)
+      print("CALL: "+ str(response.json()))
+      if response.status_code != 201:
           raise Exception("Return code for creating the provider organization isn't 201. It is " + str(response.status_code))
 
 ###############################################################
